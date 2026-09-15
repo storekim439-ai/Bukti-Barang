@@ -1095,5 +1095,730 @@ function showDetail(id) {
             class="detail-photo"
             alt="Foto barang"
         >
+  <div class="detail-card">
+
+            <div class="detail-row">
+
+                <span>
+                    Barang
+                </span>
+
+                <span>
+                    ${escapeHTML(
+                        proof.itemName
+                    )}
+                </span>
+
+            </div>
 
 
+            <div class="detail-row">
+
+                <span>
+                    Jenis
+                </span>
+
+                <span
+                    class="${typeClass}"
+                >
+                    ${escapeHTML(
+                        proof.type
+                    )}
+                </span>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Nominal
+                </span>
+
+                <span
+                    class="${typeClass}"
+                >
+                    ${sign}
+                    ${rupiah(
+                        proof.amount
+                    )}
+                </span>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Kategori
+                </span>
+
+                <span>
+                    ${escapeHTML(
+                        proof.category
+                    )}
+                </span>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Tanggal
+                </span>
+
+                <span>
+                    ${formatDate(
+                        proof.date
+                    )}
+                </span>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Waktu
+                </span>
+
+                <span>
+                    ${formatTime(
+                        proof.date
+                    )}
+                </span>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    Catatan
+                </span>
+
+                <span>
+                    ${
+                        proof.note
+                            ? escapeHTML(
+                                proof.note
+                            )
+                            : "-"
+                    }
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="downloadDetailButton"
+            class="save-button"
+            style="margin-top:12px;"
+        >
+            📥 Simpan Foto
+        </button>
+
+
+        <button
+            type="button"
+            id="shareDetailButton"
+            class="save-button"
+            style="margin-top:10px;"
+        >
+            📤 Bagikan
+        </button>
+
+
+        <button
+            type="button"
+            id="deleteDetailButton"
+            style="
+                width:100%;
+                margin-top:10px;
+                padding:14px;
+                border:none;
+                border-radius:15px;
+                background:#fee2e2;
+                color:#dc2626;
+                font-weight:800;
+            "
+        >
+            🗑️ Hapus Bukti
+        </button>
+
+    `;
+
+    detailModal.classList.add(
+        "active"
+    );
+
+    document.body.style.overflow =
+        "hidden";
+
+
+    document
+        .getElementById(
+            "downloadDetailButton"
+        )
+        .addEventListener(
+            "click",
+            downloadProof
+        );
+
+
+    document
+        .getElementById(
+            "shareDetailButton"
+        )
+        .addEventListener(
+            "click",
+            shareProof
+        );
+
+
+    document
+        .getElementById(
+            "deleteDetailButton"
+        )
+        .addEventListener(
+            "click",
+            function() {
+
+                deleteProof(
+                    proof.id
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================
+   CLOSE DETAIL
+========================================= */
+
+function closeDetail() {
+
+    if (!detailModal) return;
+
+    detailModal.classList.remove(
+        "active"
+    );
+
+    currentDetail =
+        null;
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+/* =========================================
+   DELETE PROOF
+========================================= */
+
+function deleteProof(id) {
+
+    const proof =
+        proofs.find(
+            function(item) {
+
+                return item.id === id;
+
+            }
+        );
+
+    if (!proof) return;
+
+    const confirmDelete =
+        confirm(
+            `Hapus bukti "${proof.itemName}"?`
+        );
+
+    if (!confirmDelete) return;
+
+    proofs =
+        proofs.filter(
+            function(item) {
+
+                return item.id !== id;
+
+            }
+        );
+
+    saveData();
+
+    updateDashboard();
+
+    renderProofs();
+
+    closeDetail();
+
+}
+
+
+/* =========================================
+   DELETE ALL
+========================================= */
+
+function clearAll() {
+
+    if (!proofs.length) {
+
+        alert(
+            "Belum ada bukti."
+        );
+
+        return;
+
+    }
+
+    const confirmDelete =
+        confirm(
+            "Yakin ingin menghapus semua bukti?"
+        );
+
+    if (!confirmDelete) return;
+
+    proofs = [];
+
+    saveData();
+
+    updateDashboard();
+
+    renderProofs();
+
+}
+
+
+/* =========================================
+   DOWNLOAD
+========================================= */
+
+function downloadProof() {
+
+    if (!currentDetail) return;
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+    link.href =
+        currentDetail.photo;
+
+    link.download =
+        "bukti-" +
+        cleanFileName(
+            currentDetail.itemName
+        ) +
+        ".jpg";
+
+    document.body.appendChild(
+        link
+    );
+
+    link.click();
+
+    link.remove();
+
+}
+
+
+/* =========================================
+   CLEAN FILE NAME
+========================================= */
+
+function cleanFileName(name) {
+
+    return name
+        .replace(
+            /[^a-z0-9]/gi,
+            "-"
+        )
+        .toLowerCase();
+
+}
+
+
+/* =========================================
+   SHARE
+========================================= */
+
+async function shareProof() {
+
+    if (!currentDetail) return;
+
+    const proof =
+        currentDetail;
+
+    const text =
+        `📸 BUKTI BARANG\n\n` +
+        `Barang: ${proof.itemName}\n` +
+        `Jenis: ${proof.type}\n` +
+        `Nominal: ${rupiah(proof.amount)}\n` +
+        `Kategori: ${proof.category}\n` +
+        `Tanggal: ${formatDate(proof.date)}\n` +
+        `Catatan: ${proof.note || "-"}`;
+
+    try {
+
+        const response =
+            await fetch(
+                proof.photo
+            );
+
+        const blob =
+            await response.blob();
+
+        const file =
+            new File(
+                [blob],
+                "bukti-barang.jpg",
+                {
+                    type:
+                        "image/jpeg"
+                }
+            );
+
+        if (
+            navigator.share &&
+            navigator.canShare &&
+            navigator.canShare({
+                files: [file]
+            })
+        ) {
+
+            await navigator.share({
+
+                title:
+                    "Bukti Barang",
+
+                text:
+                    text,
+
+                files:
+                    [file]
+
+            });
+
+            return;
+
+        }
+
+    } catch (error) {
+
+        console.log(
+            "Share foto tidak tersedia.",
+            error
+        );
+
+    }
+
+    if (navigator.share) {
+
+        try {
+
+            await navigator.share({
+
+                title:
+                    "Bukti Barang",
+
+                text:
+                    text
+
+            });
+
+            return;
+
+        } catch (error) {
+
+            console.log(
+                "Share dibatalkan."
+            );
+
+        }
+
+    }
+
+    try {
+
+        await navigator.clipboard.writeText(
+            text
+        );
+
+        alert(
+            "Detail bukti berhasil disalin."
+        );
+
+    } catch (error) {
+
+        alert(
+            text
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   DARK MODE
+========================================= */
+
+function loadTheme() {
+
+    const savedTheme =
+        localStorage.getItem(
+            "buktiTheme"
+        );
+
+    if (
+        savedTheme ===
+        "dark"
+    ) {
+
+        document.body.classList.add(
+            "dark"
+        );
+
+    }
+
+    updateThemeIcon();
+
+}
+
+
+function toggleTheme() {
+
+    document.body.classList.toggle(
+        "dark"
+    );
+
+    const isDark =
+        document.body.classList.contains(
+            "dark"
+        );
+
+    localStorage.setItem(
+        "buktiTheme",
+        isDark
+            ? "dark"
+            : "light"
+    );
+
+    updateThemeIcon();
+
+}
+
+
+function updateThemeIcon() {
+
+    if (!themeButton) return;
+
+    const isDark =
+        document.body.classList.contains(
+            "dark"
+        );
+
+    themeButton.textContent =
+        isDark
+            ? "☀️"
+            : "🌙";
+
+}
+
+
+/* =========================================
+   BUTTON EVENTS
+========================================= */
+
+if (newProofButton) {
+
+    newProofButton.addEventListener(
+        "click",
+        openForm
+    );
+
+}
+
+
+if (closeFormButton) {
+
+    closeFormButton.addEventListener(
+        "click",
+        closeForm
+    );
+
+}
+
+
+if (cameraButton) {
+
+    cameraButton.addEventListener(
+        "click",
+        openCamera
+    );
+
+}
+
+
+if (closeCameraButton) {
+
+    closeCameraButton.addEventListener(
+        "click",
+        closeCamera
+    );
+
+}
+
+
+if (captureButton) {
+
+    captureButton.addEventListener(
+        "click",
+        takePhoto
+    );
+
+}
+
+
+if (closeDetailButton) {
+
+    closeDetailButton.addEventListener(
+        "click",
+        closeDetail
+    );
+
+}
+
+
+if (deleteAllButton) {
+
+    deleteAllButton.addEventListener(
+        "click",
+        clearAll
+    );
+
+}
+
+
+if (themeButton) {
+
+    themeButton.addEventListener(
+        "click",
+        toggleTheme
+    );
+
+}
+
+
+/* =========================================
+   CLICK OUTSIDE MODAL
+========================================= */
+
+if (formModal) {
+
+    formModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                formModal
+            ) {
+
+                closeForm();
+
+            }
+
+        }
+    );
+
+}
+
+
+if (cameraModal) {
+
+    cameraModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                cameraModal
+            ) {
+
+                closeCamera();
+
+            }
+
+        }
+    );
+
+}
+
+
+if (detailModal) {
+
+    detailModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                detailModal
+            ) {
+
+                closeDetail();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ESC KEY
+========================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key ===
+            "Escape"
+        ) {
+
+            closeCamera();
+            closeForm();
+            closeDetail();
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   START APP
+========================================= */
+
+loadTheme();
+
+updateDashboard();
+
+renderProofs();
+
+console.log(
+    "Bukti Barang siap digunakan."
+);
