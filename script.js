@@ -1184,24 +1184,36 @@ async function shareProof() {
 
     try {
 
-        await navigator.clipboard.writeText(
-            text
-        );
+    await navigator.clipboard.writeText(text);
 
-        alert(
-            "Detail bukti berhasil disalin."
-        );
+    alert("Detail bukti berhasil disalin.");
 
-    } catch (error) {
+} catch (error) {
 
- function openCamera() {
+    alert("Gagal membagikan atau menyalin detail bukti.");
+
+}
+
+}
+
+
+/* =========================================
+   OPEN CAMERA
+========================================= */
+
+function openCamera() {
+
     const camera =
         document.getElementById("cameraInput");
 
     if (!camera) {
+
         alert("Kamera tidak ditemukan.");
+
         return;
+
     }
 
     camera.click();
- }
+
+}
