@@ -145,21 +145,7 @@
 
                 <div class="photo-buttons">
 
-                    <label class="camera-btn">
-
-                        📷 Ambil Foto
-
-                        <input
-                            type="file"
-                            id="cameraInput"
-                            accept="image/*"
-                            capture="environment"
-                            onchange="handlePhoto(event)"
-                            hidden
-                        >
-
-                    </label>
-
+                    
 
                     <label class="gallery-btn">
 
@@ -171,7 +157,22 @@
                             accept="image/*"
                             onchange="handlePhoto(event)"
                             hidden
-                        >
+         <button
+    type="button"
+    class="camera-btn"
+    onclick="openCamera()"
+>
+    📷 Ambil Foto
+</button>
+
+<input
+    type="file"
+    id="cameraInput"
+    accept="image/*"
+    capture="environment"
+    onchange="handlePhoto(event)"
+    style="display:none;"
+>               >
 
                     </label>
 
