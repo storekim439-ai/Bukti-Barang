@@ -1194,4 +1194,14 @@ async function shareProof() {
 
     } catch (error) {
 
- 
+ function openCamera() {
+    const camera =
+        document.getElementById("cameraInput");
+
+    if (!camera) {
+        alert("Kamera tidak ditemukan.");
+        return;
+    }
+
+    camera.click();
+ }
