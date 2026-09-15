@@ -1,32 +1,83 @@
 /* =========================================
    BUKTI BARANG
-   MAIN JAVASCRIPT
+   JAVASCRIPT FINAL
 ========================================= */
+
+"use strict";
 
 
 /* =========================================
    DATA
 ========================================= */
 
-let proofs =
-    JSON.parse(
-        localStorage.getItem("buktiBarang")
-    ) || [];
+let proofs = [];
+
+try {
+    proofs =
+        JSON.parse(
+            localStorage.getItem("buktiBarang")
+        ) || [];
+} catch (error) {
+    console.error(error);
+    proofs = [];
+}
 
 let currentPhoto = "";
-
 let currentDetail = null;
+let cameraStream = null;
 
 
 /* =========================================
    ELEMENT
 ========================================= */
 
+const newProofButton =
+    document.getElementById("newProofButton");
+
+const closeFormButton =
+    document.getElementById("closeFormButton");
+
+const cameraButton =
+    document.getElementById("cameraButton");
+
+const closeCameraButton =
+    document.getElementById("closeCameraButton");
+
+const captureButton =
+    document.getElementById("captureButton");
+
+const closeDetailButton =
+    document.getElementById("closeDetailButton");
+
+const deleteAllButton =
+    document.getElementById("deleteAllButton");
+
+const themeButton =
+    document.getElementById("themeButton");
+
 const formModal =
     document.getElementById("formModal");
 
+const cameraModal =
+    document.getElementById("cameraModal");
+
 const detailModal =
     document.getElementById("detailModal");
+
+const cameraVideo =
+    document.getElementById("cameraVideo");
+
+const cameraCanvas =
+    document.getElementById("cameraCanvas");
+
+const galleryInput =
+    document.getElementById("galleryInput");
+
+const photoPreview =
+    document.getElementById("photoPreview");
+
+const proofForm =
+    document.getElementById("proofForm");
 
 const proofList =
     document.getElementById("proofList");
@@ -37,14 +88,19 @@ const totalProof =
 const totalValue =
     document.getElementById("totalValue");
 
-const photoPreview =
-    document.getElementById("photoPreview");
+const detailContent =
+    document.getElementById("detailContent");
 
-const cameraInput =
-    document.getElementById("cameraInput");
 
-const galleryInput =
-    document.getElementById("galleryInput");
+/* =========================================
+   CHECK ELEMENT
+========================================= */
+
+console.log("Bukti Barang berhasil dimuat.");
+
+if (!newProofButton) {
+    console.error("newProofButton tidak ditemukan.");
+}
 
 
 /* =========================================
@@ -53,10 +109,22 @@ const galleryInput =
 
 function saveData() {
 
-    localStorage.setItem(
-        "buktiBarang",
-        JSON.stringify(proofs)
-    );
+    try {
+
+        localStorage.setItem(
+            "buktiBarang",
+            JSON.stringify(proofs)
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Penyimpanan penuh. Coba hapus beberapa bukti lama."
+        );
+
+    }
 
 }
 
@@ -74,7 +142,7 @@ function rupiah(number) {
             currency: "IDR",
             minimumFractionDigits: 0
         }
-    ).format(number);
+    ).format(Number(number) || 0);
 
 }
 
@@ -102,35 +170,54 @@ function escapeHTML(text) {
 
 function openForm() {
 
-    formModal.classList.add("active");
+    if (!formModal) {
+        alert("Form tidak ditemukan.");
+        return;
+    }
 
     currentPhoto = "";
 
+    resetForm();
+
+    formModal.classList.add("active");
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+/* =========================================
+   RESET FORM
+========================================= */
+
+function resetForm() {
+
+    if (proofForm) {
+        proofForm.reset();
+    }
+
+    const transactionType =
+        document.getElementById(
+            "transactionType"
+        );
+
+    const category =
+        document.getElementById(
+            "category"
+        );
+
+    if (transactionType) {
+        transactionType.value =
+            "Pemasukan";
+    }
+
+    if (category) {
+        category.value =
+            "Barang";
+    }
+
     resetPhotoPreview();
-
-    document.getElementById(
-        "itemName"
-    ).value = "";
-
-    document.getElementById(
-        "amount"
-    ).value = "";
-
-    document.getElementById(
-        "transactionType"
-    ).value = "Pemasukan";
-
-    document.getElementById(
-        "category"
-    ).value = "Barang";
-
-    document.getElementById(
-        "note"
-    ).value = "";
-
-    cameraInput.value = "";
-
-    galleryInput.value = "";
 
 }
 
@@ -141,7 +228,14 @@ function openForm() {
 
 function closeForm() {
 
-    formModal.classList.remove("active");
+    if (!formModal) return;
+
+    formModal.classList.remove(
+        "active"
+    );
+
+    document.body.style.overflow =
+        "";
 
 }
 
@@ -152,19 +246,39 @@ function closeForm() {
 
 function resetPhotoPreview() {
 
+    if (!photoPreview) return;
+
     photoPreview.classList.remove(
         "has-image"
     );
 
     photoPreview.innerHTML = `
-        <div class="camera-icon">
+        <div>
             📷
         </div>
 
         <p>
-            Belum ada foto barang
+            Belum ada foto
         </p>
     `;
+
+}
+
+
+/* =========================================
+   GALLERY PHOTO
+========================================= */
+
+if (galleryInput) {
+
+    galleryInput.addEventListener(
+        "change",
+        function(event) {
+
+            handlePhoto(event);
+
+        }
+    );
 
 }
 
@@ -176,57 +290,60 @@ function resetPhotoPreview() {
 function handlePhoto(event) {
 
     const file =
+        event.target.files &&
         event.target.files[0];
 
     if (!file) return;
 
-
     if (!file.type.startsWith("image/")) {
 
         alert(
-            "File yang dipilih harus berupa gambar."
+            "File harus berupa gambar."
         );
 
         return;
 
     }
 
-
-    /*
-       Resize foto supaya localStorage
-       tidak cepat penuh.
-    */
-
     compressImage(
         file,
         1200,
         0.78
     )
-    .then(function(dataURL) {
+    .then(
+        function(dataURL) {
 
-        currentPhoto = dataURL;
+            currentPhoto =
+                dataURL;
 
-        photoPreview.classList.add(
-            "has-image"
-        );
+            if (photoPreview) {
 
-        photoPreview.innerHTML = `
-            <img
-                src="${dataURL}"
-                alt="Foto barang"
-            >
-        `;
+                photoPreview.classList.add(
+                    "has-image"
+                );
 
-    })
-    .catch(function(error) {
+                photoPreview.innerHTML = `
+                    <img
+                        src="${dataURL}"
+                        alt="Foto barang"
+                    >
+                `;
 
-        console.error(error);
+            }
 
-        alert(
-            "Foto gagal diproses."
-        );
+        }
+    )
+    .catch(
+        function(error) {
 
-    });
+            console.error(error);
+
+            alert(
+                "Foto gagal diproses."
+            );
+
+        }
+    );
 
 }
 
@@ -242,87 +359,83 @@ function compressImage(
 ) {
 
     return new Promise(
-        (resolve, reject) => {
+        function(resolve, reject) {
 
             const reader =
                 new FileReader();
 
+            reader.onload =
+                function(event) {
 
-            reader.onload = function(e) {
+                    const img =
+                        new Image();
 
-                const img =
-                    new Image();
+                    img.onload =
+                        function() {
 
+                            let width =
+                                img.width;
 
-                img.onload = function() {
+                            let height =
+                                img.height;
 
-                    let width =
-                        img.width;
+                            if (
+                                width >
+                                maxWidth
+                            ) {
 
-                    let height =
-                        img.height;
+                                height =
+                                    height *
+                                    (
+                                        maxWidth /
+                                        width
+                                    );
 
+                                width =
+                                    maxWidth;
 
-                    if (
-                        width >
-                        maxWidth
-                    ) {
+                            }
 
-                        height =
-                            height *
-                            (maxWidth / width);
+                            const canvas =
+                                document.createElement(
+                                    "canvas"
+                                );
 
-                        width =
-                            maxWidth;
+                            canvas.width =
+                                width;
 
-                    }
+                            canvas.height =
+                                height;
 
+                            const ctx =
+                                canvas.getContext(
+                                    "2d"
+                                );
 
-                    const canvas =
-                        document.createElement(
-                            "canvas"
-                        );
+                            ctx.drawImage(
+                                img,
+                                0,
+                                0,
+                                width,
+                                height
+                            );
 
-                    canvas.width =
-                        width;
+                            resolve(
+                                canvas.toDataURL(
+                                    "image/jpeg",
+                                    quality
+                                )
+                            );
 
-                    canvas.height =
-                        height;
+                        };
 
+                    img.onerror =
+                        reject;
 
-                    const ctx =
-                        canvas.getContext(
-                            "2d"
-                        );
-
-
-                    ctx.drawImage(
-                        img,
-                        0,
-                        0,
-                        width,
-                        height
-                    );
-
-
-                    resolve(
-                        canvas.toDataURL(
-                            "image/jpeg",
-                            quality
-                        )
-                    );
+                    img.src =
+                        event.target.result;
 
                 };
-
-
-                img.onerror =
-                    reject;
-
-                img.src =
-                    e.target.result;
-
-            };
-
 
             reader.onerror =
                 reject;
@@ -336,25 +449,284 @@ function compressImage(
 
 
 /* =========================================
+   OPEN LIVE CAMERA
+========================================= */
+
+async function openCamera() {
+
+    if (!cameraModal) {
+        alert("Kamera tidak ditemukan.");
+        return;
+    }
+
+    if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+    ) {
+
+        alert(
+            "Browser tidak mendukung kamera langsung."
+        );
+
+        return;
+
+    }
+
+    try {
+
+        cameraStream =
+            await navigator.mediaDevices.getUserMedia(
+                {
+                    video: {
+                        facingMode: {
+                            ideal: "environment"
+                        },
+                        width: {
+                            ideal: 1280
+                        },
+                        height: {
+                            ideal: 720
+                        }
+                    },
+                    audio: false
+                }
+            );
+
+        cameraVideo.srcObject =
+            cameraStream;
+
+        cameraModal.classList.add(
+            "active"
+        );
+
+        document.body.style.overflow =
+            "hidden";
+
+        await cameraVideo.play();
+
+    } catch (error) {
+
+        console.error(
+            "Camera error:",
+            error
+        );
+
+        let message =
+            "Kamera tidak bisa dibuka.";
+
+        if (
+            error.name ===
+            "NotAllowedError"
+        ) {
+
+            message =
+                "Izin kamera ditolak. Izinkan kamera untuk website ini di Chrome.";
+
+        } else if (
+            error.name ===
+            "NotFoundError"
+        ) {
+
+            message =
+                "Kamera tidak ditemukan di perangkat.";
+
+        } else if (
+            error.name ===
+            "NotReadableError"
+        ) {
+
+            message =
+                "Kamera sedang digunakan aplikasi lain.";
+
+        } else if (
+            error.name ===
+            "SecurityError"
+        ) {
+
+            message =
+                "Kamera membutuhkan koneksi HTTPS.";
+
+        }
+
+        alert(message);
+
+    }
+
+}
+
+
+/* =========================================
+   CAPTURE PHOTO
+========================================= */
+
+function takePhoto() {
+
+    if (!cameraVideo) return;
+
+    if (
+        !cameraVideo.videoWidth ||
+        !cameraVideo.videoHeight
+    ) {
+
+        alert(
+            "Kamera belum siap. Tunggu sebentar."
+        );
+
+        return;
+
+    }
+
+    const width =
+        cameraVideo.videoWidth;
+
+    const height =
+        cameraVideo.videoHeight;
+
+    const maxWidth = 1200;
+
+    let finalWidth =
+        width;
+
+    let finalHeight =
+        height;
+
+    if (
+        finalWidth >
+        maxWidth
+    ) {
+
+        finalHeight =
+            finalHeight *
+            (
+                maxWidth /
+                finalWidth
+            );
+
+        finalWidth =
+            maxWidth;
+
+    }
+
+    cameraCanvas.width =
+        finalWidth;
+
+    cameraCanvas.height =
+        finalHeight;
+
+    const ctx =
+        cameraCanvas.getContext(
+            "2d"
+        );
+
+    ctx.drawImage(
+        cameraVideo,
+        0,
+        0,
+        finalWidth,
+        finalHeight
+    );
+
+    currentPhoto =
+        cameraCanvas.toDataURL(
+            "image/jpeg",
+            0.82
+        );
+
+    if (photoPreview) {
+
+        photoPreview.classList.add(
+            "has-image"
+        );
+
+        photoPreview.innerHTML = `
+            <img
+                src="${currentPhoto}"
+                alt="Foto barang"
+            >
+        `;
+
+    }
+
+    closeCamera();
+
+}
+
+
+/* =========================================
+   CLOSE CAMERA
+========================================= */
+
+function closeCamera() {
+
+    if (cameraStream) {
+
+        cameraStream
+            .getTracks()
+            .forEach(
+                function(track) {
+
+                    track.stop();
+
+                }
+            );
+
+        cameraStream =
+            null;
+
+    }
+
+    if (cameraVideo) {
+
+        cameraVideo.srcObject =
+            null;
+
+    }
+
+    if (cameraModal) {
+
+        cameraModal.classList.remove(
+            "active"
+        );
+
+    }
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+/* =========================================
    SAVE PROOF
 ========================================= */
+
+if (proofForm) {
+
+    proofForm.addEventListener(
+        "submit",
+        function(event) {
+
+            saveProof(event);
+
+        }
+    );
+
+}
+
 
 function saveProof(event) {
 
     event.preventDefault();
-
 
     const itemName =
         document.getElementById(
             "itemName"
         ).value.trim();
 
-
     const type =
         document.getElementById(
             "transactionType"
         ).value;
-
 
     const amount =
         Number(
@@ -363,18 +735,15 @@ function saveProof(event) {
             ).value
         );
 
-
     const category =
         document.getElementById(
             "category"
         ).value;
 
-
     const note =
         document.getElementById(
             "note"
         ).value.trim();
-
 
     if (!itemName) {
 
@@ -386,7 +755,6 @@ function saveProof(event) {
 
     }
 
-
     if (!amount || amount <= 0) {
 
         alert(
@@ -397,21 +765,18 @@ function saveProof(event) {
 
     }
 
-
     if (!currentPhoto) {
 
         alert(
-            "📷 Silakan foto barang terlebih dahulu."
+            "📷 Foto barang terlebih dahulu."
         );
 
         return;
 
     }
 
-
     const now =
         new Date();
-
 
     const proof = {
 
@@ -437,20 +802,13 @@ function saveProof(event) {
             currentPhoto,
 
         date:
-            now.toISOString(),
-
-        createdAt:
-            now.toLocaleString(
-                "id-ID"
-            )
+            now.toISOString()
 
     };
-
 
     proofs.unshift(
         proof
     );
-
 
     saveData();
 
@@ -460,7 +818,6 @@ function saveProof(event) {
 
     closeForm();
 
-
     alert(
         "✅ Bukti barang berhasil disimpan!"
     );
@@ -469,7 +826,7 @@ function saveProof(event) {
 
 
 /* =========================================
-   FORMAT DATE
+   DATE
 ========================================= */
 
 function formatDate(date) {
@@ -489,7 +846,7 @@ function formatDate(date) {
 
 
 /* =========================================
-   FORMAT TIME
+   TIME
 ========================================= */
 
 function formatTime(date) {
@@ -513,10 +870,11 @@ function formatTime(date) {
 
 function renderProofs() {
 
+    if (!proofList) return;
+
     if (!proofs.length) {
 
         proofList.innerHTML = `
-
             <div class="empty-state">
 
                 <div class="empty-icon">
@@ -528,18 +886,15 @@ function renderProofs() {
                 </h3>
 
                 <p>
-                    Foto barang pertamamu dan simpan
-                    sebagai bukti transaksi.
+                    Buat bukti barang pertamamu.
                 </p>
 
             </div>
-
         `;
 
         return;
 
     }
-
 
     proofList.innerHTML =
         proofs.map(
@@ -551,19 +906,16 @@ function renderProofs() {
                         ? "income"
                         : "expense";
 
-
                 const sign =
                     proof.type ===
                     "Pemasukan"
                         ? "+"
                         : "-";
 
-
                 return `
-
                     <div
                         class="proof-card"
-                        onclick="showDetail(${proof.id})"
+                        data-id="${proof.id}"
                     >
 
                         <div class="proof-image">
@@ -597,7 +949,9 @@ function renderProofs() {
                             </p>
 
                             <p>
-                                ${proof.type}
+                                ${escapeHTML(
+                                    proof.type
+                                )}
                                 •
                                 ${formatTime(
                                     proof.date
@@ -616,11 +970,40 @@ function renderProofs() {
                         </div>
 
                     </div>
-
                 `;
 
             }
         ).join("");
+
+}
+
+
+/* =========================================
+   CLICK PROOF CARD
+========================================= */
+
+if (proofList) {
+
+    proofList.addEventListener(
+        "click",
+        function(event) {
+
+            const card =
+                event.target.closest(
+                    ".proof-card"
+                );
+
+            if (!card) return;
+
+            const id =
+                Number(
+                    card.dataset.id
+                );
+
+            showDetail(id);
+
+        }
+    );
 
 }
 
@@ -631,32 +1014,40 @@ function renderProofs() {
 
 function updateDashboard() {
 
-    totalProof.textContent =
-        proofs.length;
+    if (totalProof) {
 
+        totalProof.textContent =
+            proofs.length;
+
+    }
 
     const total =
         proofs.reduce(
             function(sum, proof) {
 
-                return sum +
+                return (
+                    sum +
                     Number(
                         proof.amount
-                    );
+                    )
+                );
 
             },
             0
         );
 
+    if (totalValue) {
 
-    totalValue.textContent =
-        rupiah(total);
+        totalValue.textContent =
+            rupiah(total);
+
+    }
 
 }
 
 
 /* =========================================
-   SHOW DETAIL
+   DETAIL
 ========================================= */
 
 function showDetail(id) {
@@ -665,11 +1056,12 @@ function showDetail(id) {
         proofs.find(
             function(item) {
 
-                return item.id === id;
+                return (
+                    item.id === id
+                );
 
             }
         );
-
 
     if (!proof) {
 
@@ -681,10 +1073,8 @@ function showDetail(id) {
 
     }
 
-
     currentDetail =
         proof;
-
 
     const typeClass =
         proof.type ===
@@ -692,528 +1082,18 @@ function showDetail(id) {
             ? "income"
             : "expense";
 
-
     const sign =
         proof.type ===
         "Pemasukan"
             ? "+"
             : "-";
 
-
-    document.getElementById(
-        "detailContent"
-    ).innerHTML = `
+    detailContent.innerHTML = `
 
         <img
             src="${proof.photo}"
             class="detail-photo"
-            alt="Foto ${escapeHTML(
-                proof.itemName
-            )}"
+            alt="Foto barang"
         >
 
 
-        <div class="detail-card">
-
-            <div class="detail-row">
-
-                <span>
-                    Barang
-                </span>
-
-                <span>
-                    ${escapeHTML(
-                        proof.itemName
-                    )}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span>
-                    Jenis
-                </span>
-
-                <span class="${typeClass}">
-                    ${proof.type}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span>
-                    Nominal
-                </span>
-
-                <span class="${typeClass}">
-                    ${sign}
-                    ${rupiah(
-                        proof.amount
-                    )}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span>
-                    Kategori
-                </span>
-
-                <span>
-                    ${escapeHTML(
-                        proof.category
-                    )}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span>
-                    Tanggal
-                </span>
-
-                <span>
-                    ${formatDate(
-                        proof.date
-                    )}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span>
-                    Waktu
-                </span>
-
-                <span>
-                    ${formatTime(
-                        proof.date
-                    )}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span>
-                    Catatan
-                </span>
-
-                <span>
-                    ${
-                        proof.note
-                            ? escapeHTML(
-                                proof.note
-                              )
-                            : "-"
-                    }
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <button
-            onclick="deleteProof(${proof.id})"
-            style="
-                width:100%;
-                margin-top:10px;
-                padding:13px;
-                border:none;
-                border-radius:14px;
-                background:#fee2e2;
-                color:#dc2626;
-                font-weight:800;
-                cursor:pointer;
-            "
-        >
-            🗑️ Hapus Bukti
-        </button>
-
-    `;
-
-
-    detailModal.classList.add(
-        "active"
-    );
-
-}
-
-
-/* =========================================
-   CLOSE DETAIL
-========================================= */
-
-function closeDetail() {
-
-    detailModal.classList.remove(
-        "active"
-    );
-
-    currentDetail = null;
-
-}
-
-
-/* =========================================
-   DELETE PROOF
-========================================= */
-
-function deleteProof(id) {
-
-    const proof =
-        proofs.find(
-            function(item) {
-
-                return item.id === id;
-
-            }
-        );
-
-
-    if (!proof) return;
-
-
-    const confirmDelete =
-        confirm(
-            `Hapus bukti "${proof.itemName}"?`
-        );
-
-
-    if (!confirmDelete) return;
-
-
-    proofs =
-        proofs.filter(
-            function(item) {
-
-                return item.id !== id;
-
-            }
-        );
-
-
-    saveData();
-
-    updateDashboard();
-
-    renderProofs();
-
-    closeDetail();
-
-
-    alert(
-        "Bukti berhasil dihapus."
-    );
-
-}
-
-
-/* =========================================
-   DELETE ALL
-========================================= */
-
-function clearAll() {
-
-    if (!proofs.length) {
-
-        alert(
-            "Belum ada bukti yang tersimpan."
-        );
-
-        return;
-
-    }
-
-
-    const confirmDelete =
-        confirm(
-            "Yakin ingin menghapus SEMUA bukti?"
-        );
-
-
-    if (!confirmDelete) return;
-
-
-    proofs = [];
-
-    saveData();
-
-    updateDashboard();
-
-    renderProofs();
-
-
-    alert(
-        "Semua bukti berhasil dihapus."
-    );
-
-}
-
-
-/* =========================================
-   DOWNLOAD PHOTO
-========================================= */
-
-function downloadProof() {
-
-    if (!currentDetail) {
-
-        alert(
-            "Bukti tidak ditemukan."
-        );
-
-        return;
-
-    }
-
-
-    const link =
-        document.createElement("a");
-
-
-    link.href =
-        currentDetail.photo;
-
-
-    link.download =
-        "bukti-" +
-        cleanFileName(
-            currentDetail.itemName
-        ) +
-        ".jpg";
-
-
-    document.body.appendChild(
-        link
-    );
-
-    link.click();
-
-    link.remove();
-
-}
-
-
-/* =========================================
-   CLEAN FILE NAME
-========================================= */
-
-function cleanFileName(name) {
-
-    return name
-        .replace(
-            /[^a-z0-9]/gi,
-            "-"
-        )
-        .toLowerCase();
-
-}
-
-
-/* =========================================
-   SHARE
-========================================= */
-
-async function shareProof() {
-
-    if (!currentDetail) {
-
-        alert(
-            "Bukti tidak ditemukan."
-        );
-
-        return;
-
-    }
-
-
-    const proof =
-        currentDetail;
-
-
-    const text =
-
-        `📸 BUKTI BARANG\n\n` +
-
-        `Barang: ${
-            proof.itemName
-        }\n` +
-
-        `Jenis: ${
-            proof.type
-        }\n` +
-
-        `Nominal: ${
-            rupiah(
-                proof.amount
-            )
-        }\n` +
-
-        `Kategori: ${
-            proof.category
-        }\n` +
-
-        `Tanggal: ${
-            formatDate(
-                proof.date
-            )
-        }\n` +
-
-        `Catatan: ${
-            proof.note || "-"
-        }`;
-
-
-    /*
-       Coba share bersama foto
-       jika browser Android
-       mendukung Web Share API.
-    */
-
-    try {
-
-        const response =
-            await fetch(
-                proof.photo
-            );
-
-
-        const blob =
-            await response.blob();
-
-
-        const file =
-            new File(
-                [
-                    blob
-                ],
-                "bukti-barang.jpg",
-                {
-                    type:
-                        "image/jpeg"
-                }
-            );
-
-
-        if (
-            navigator.share &&
-            navigator.canShare &&
-            navigator.canShare({
-                files: [file]
-            })
-        ) {
-
-            await navigator.share({
-
-                title:
-                    "Bukti Barang",
-
-                text:
-                    text,
-
-                files:
-                    [file]
-
-            });
-
-            return;
-
-        }
-
-    } catch (error) {
-
-        console.log(
-            "Share foto tidak tersedia.",
-            error
-        );
-
-    }
-
-
-    /*
-       Fallback kalau browser
-       tidak mendukung share file.
-    */
-
-    if (
-        navigator.share
-    ) {
-
-        try {
-
-            await navigator.share({
-
-                title:
-                    "Bukti Barang",
-
-                text:
-                    text
-
-            });
-
-            return;
-
-        } catch (error) {
-
-            console.log(
-                "Share dibatalkan."
-            );
-
-        }
-
-    }
-
-
-    /*
-       Fallback terakhir:
-       copy informasi ke clipboard.
-    */
-
-    try {
-
-    await navigator.clipboard.writeText(text);
-
-    alert("Detail bukti berhasil disalin.");
-
-} catch (error) {
-
-    alert("Gagal membagikan atau menyalin detail bukti.");
-
-}
-
-}
-
-
-/* =========================================
-   OPEN CAMERA
-========================================= */
-
-function openCamera() {
-
-    const camera =
-        document.getElementById("cameraInput");
-
-    if (!camera) {
-
-        alert("Kamera tidak ditemukan.");
-
-        return;
-
-    }
-
-    camera.click();
-
-}
