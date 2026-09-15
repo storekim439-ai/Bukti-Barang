@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bukti Barang</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div>
+            <p class="brand">BUKTI BARANG</p>
+            <h1>Catat & Simpan Bukti</h1>
+        </div>
+
+        <button id="themeBtn" class="theme-btn" onclick="toggleTheme()">
+            🌙
+        </button>
+    </header>
+
+
+    <main class="container">
+
+        <!-- HERO -->
+        <section class="hero-card">
+
+            <div class="hero-icon">
+                📸
+            </div>
+
+            <div>
+                <h2>Bukti Barang Digital</h2>
+
+                <p>
+                    Foto barang, tambahkan detail transaksi,
+                    lalu simpan sebagai bukti digital.
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- TOMBOL TAMBAH -->
+        <button class="add-btn" onclick="openForm()">
+            <span>＋</span>
+            Buat Bukti Baru
+        </button>
+
+
+        <!-- STATISTIK -->
+        <section class="stats">
+
+            <div class="stat-card">
+                <span>📋</span>
+                <small>Total Bukti</small>
+                <strong id="totalProof">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>💰</span>
+                <small>Total Nilai</small>
+                <strong id="totalValue">Rp 0</strong>
+            </div>
+
+        </section>
+
+
+        <!-- RIWAYAT -->
+        <section class="history-section">
+
+            <div class="section-title">
+                <div>
+                    <small>RIWAYAT</small>
+                    <h2>Bukti Terbaru</h2>
+                </div>
+
+                <button onclick="clearAll()" class="clear-btn">
+                    Hapus Semua
+                </button>
+            </div>
+
+
+            <div id="proofList" class="proof-list">
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        📦
+                    </div>
+
+                    <h3>Belum ada bukti</h3>
+
+                    <p>
+                        Foto barang pertamamu dan simpan
+                        sebagai bukti transaksi.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- MODAL FORM -->
+    <div id="formModal" class="modal">
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <div>
+                    <small>BUAT BUKTI</small>
+                    <h2>Tambah Barang</h2>
+                </div>
+
+                <button onclick="closeForm()" class="close-btn">
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- CAMERA -->
+            <div class="photo-area">
+
+                <div id="photoPreview" class="photo-preview">
+
+                    <div class="camera-icon">
+                        📷
+                    </div>
+
+                    <p>
+                        Belum ada foto barang
+                    </p>
+
+                </div>
+
+
+                <div class="photo-buttons">
+
+                    <label class="camera-btn">
+
+                        📷 Ambil Foto
+
+                        <input
+                            type="file"
+                            id="cameraInput"
+                            accept="image/*"
+                            capture="environment"
+                            onchange="handlePhoto(event)"
+                            hidden
+                        >
+
+                    </label>
+
+
+                    <label class="gallery-btn">
+
+                        🖼️ Galeri
+
+                        <input
+                            type="file"
+                            id="galleryInput"
+                            accept="image/*"
+                            onchange="handlePhoto(event)"
+                            hidden
+                        >
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- FORM -->
+            <form onsubmit="saveProof(event)">
+
+                <div class="input-group">
+
+                    <label>
+                        Nama Barang
+                    </label>
+
+                    <input
+                        type="text"
+                        id="itemName"
+                        placeholder="Contoh: Sepatu"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="input-row">
+
+                    <div class="input-group">
+
+                        <label>
+                            Jenis
+                        </label>
+
+                        <select id="transactionType">
+
+                            <option value="Pemasukan">
+                                💰 Pemasukan
+                            </option>
+
+                            <option value="Pengeluaran">
+                                💸 Pengeluaran
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label>
+                            Nominal
+                        </label>
+
+                        <input
+                            type="number"
+                            id="amount"
+                            placeholder="50000"
+                            min="0"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>
+                        Kategori
+                    </label>
+
+                    <select id="category">
+
+                        <option value="Barang">
+                            📦 Barang
+                        </option>
+
+                        <option value="Makanan">
+                            🍔 Makanan
+                        </option>
+
+                        <option value="Elektronik">
+                            💻 Elektronik
+                        </option>
+
+                        <option value="Fashion">
+                            👕 Fashion
+                        </option>
+
+                        <option value="Lainnya">
+                            📁 Lainnya
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>
+                        Catatan
+                    </label>
+
+                    <textarea
+                        id="note"
+                        placeholder="Contoh: Barang sudah diterima customer..."
+                    ></textarea>
+
+                </div>
+
+
+                <button class="save-btn" type="submit">
+
+                    ✓ Simpan Bukti
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- MODAL DETAIL -->
+    <div id="detailModal" class="modal">
+
+        <div class="modal-box detail-box">
+
+            <div class="modal-header">
+
+                <div>
+                    <small>DETAIL</small>
+                    <h2>Bukti Barang</h2>
+                </div>
+
+                <button
+                    onclick="closeDetail()"
+                    class="close-btn"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div id="detailContent"></div>
+
+
+            <div class="detail-actions">
+
+                <button
+                    onclick="downloadProof()"
+                    class="download-btn"
+                >
+                    📥 Simpan
+                </button>
+
+                <button
+                    onclick="shareProof()"
+                    class="share-btn"
+                >
+                    📤 Bagikan
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+  </html>
