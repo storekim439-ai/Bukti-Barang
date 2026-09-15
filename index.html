@@ -1,51 +1,86 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0f172a"
+    >
 
     <title>Bukti Barang</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 </head>
 
 <body>
 
+    <!-- HEADER -->
     <header class="topbar">
+
         <div>
-            <p class="brand">BUKTI BARANG</p>
-            <h1>Catat & Simpan Bukti</h1>
+            <div class="logo">
+                📦 BUKTI BARANG
+            </div>
+
+            <h1>
+                Catat Bukti Barang
+            </h1>
+
+            <p>
+                Foto dan simpan bukti barang dengan mudah.
+            </p>
         </div>
 
-        <button id="themeBtn" class="theme-btn" onclick="toggleTheme()">
+        <button
+            id="themeButton"
+            class="theme-button"
+            type="button"
+        >
             🌙
         </button>
+
     </header>
 
 
+    <!-- MAIN -->
     <main class="container">
 
         <!-- HERO -->
-        <section class="hero-card">
+        <section class="hero">
 
             <div class="hero-icon">
                 📸
             </div>
 
             <div>
-                <h2>Bukti Barang Digital</h2>
+                <h2>
+                    Bukti Barang Digital
+                </h2>
 
                 <p>
-                    Foto barang, tambahkan detail transaksi,
-                    lalu simpan sebagai bukti digital.
+                    Ambil foto barang menggunakan kamera HP,
+                    lalu simpan detailnya sebagai bukti.
                 </p>
             </div>
 
         </section>
 
 
-        <!-- TOMBOL TAMBAH -->
-        <button class="add-btn" onclick="openForm()">
+        <!-- BUTTON -->
+        <button
+            id="newProofButton"
+            class="new-proof-button"
+            type="button"
+        >
             <span>＋</span>
             Buat Bukti Baru
         </button>
@@ -55,36 +90,68 @@
         <section class="stats">
 
             <div class="stat-card">
-                <span>📋</span>
-                <small>Total Bukti</small>
-                <strong id="totalProof">0</strong>
+
+                <span class="stat-icon">
+                    📋
+                </span>
+
+                <small>
+                    Total Bukti
+                </small>
+
+                <strong id="totalProof">
+                    0
+                </strong>
+
             </div>
 
+
             <div class="stat-card">
-                <span>💰</span>
-                <small>Total Nilai</small>
-                <strong id="totalValue">Rp 0</strong>
+
+                <span class="stat-icon">
+                    💰
+                </span>
+
+                <small>
+                    Total Nilai
+                </small>
+
+                <strong id="totalValue">
+                    Rp 0
+                </strong>
+
             </div>
 
         </section>
 
 
         <!-- RIWAYAT -->
-        <section class="history-section">
+        <section class="history">
 
-            <div class="section-title">
+            <div class="section-heading">
+
                 <div>
-                    <small>RIWAYAT</small>
-                    <h2>Bukti Terbaru</h2>
+                    <small>
+                        RIWAYAT
+                    </small>
+
+                    <h2>
+                        Bukti Terbaru
+                    </h2>
                 </div>
 
-                <button onclick="clearAll()" class="clear-btn">
+                <button
+                    id="deleteAllButton"
+                    class="delete-all-button"
+                    type="button"
+                >
                     Hapus Semua
                 </button>
+
             </div>
 
 
-            <div id="proofList" class="proof-list">
+            <div id="proofList">
 
                 <div class="empty-state">
 
@@ -92,11 +159,12 @@
                         📦
                     </div>
 
-                    <h3>Belum ada bukti</h3>
+                    <h3>
+                        Belum ada bukti
+                    </h3>
 
                     <p>
-                        Foto barang pertamamu dan simpan
-                        sebagai bukti transaksi.
+                        Buat bukti barang pertamamu.
                     </p>
 
                 </div>
@@ -108,91 +176,99 @@
     </main>
 
 
-    <!-- MODAL FORM -->
-    <div id="formModal" class="modal">
+    <!-- FORM MODAL -->
+    <div
+        id="formModal"
+        class="modal"
+    >
 
-        <div class="modal-box">
+        <div class="modal-content">
 
             <div class="modal-header">
 
                 <div>
-                    <small>BUAT BUKTI</small>
-                    <h2>Tambah Barang</h2>
+                    <small>
+                        BUKTI BARU
+                    </small>
+
+                    <h2>
+                        Tambah Barang
+                    </h2>
                 </div>
 
-                <button onclick="closeForm()" class="close-btn">
+                <button
+                    id="closeFormButton"
+                    class="close-button"
+                    type="button"
+                >
                     ×
                 </button>
 
             </div>
 
 
-            <!-- CAMERA -->
-            <div class="photo-area">
+            <!-- FOTO -->
+            <section class="photo-section">
 
-                <div id="photoPreview" class="photo-preview">
+                <div
+                    id="photoPreview"
+                    class="photo-preview"
+                >
 
-                    <div class="camera-icon">
+                    <div>
                         📷
                     </div>
 
                     <p>
-                        Belum ada foto barang
+                        Belum ada foto
                     </p>
 
                 </div>
 
 
-                <div class="photo-buttons">
+                <div class="photo-actions">
 
-                    
+                    <button
+                        id="cameraButton"
+                        class="camera-button"
+                        type="button"
+                    >
+                        📷 Ambil Foto
+                    </button>
 
-                    <label class="gallery-btn">
+
+                    <label
+                        class="gallery-button"
+                    >
 
                         🖼️ Galeri
 
                         <input
-                            type="file"
                             id="galleryInput"
+                            type="file"
                             accept="image/*"
-                            onchange="handlePhoto(event)"
                             hidden
-         <button
-    type="button"
-    class="camera-btn"
-    onclick="openCamera()"
->
-    📷 Ambil Foto
-</button>
-
-<input
-    type="file"
-    id="cameraInput"
-    accept="image/*"
-    capture="environment"
-    onchange="handlePhoto(event)"
-    style="display:none;"
->               >
+                        >
 
                     </label>
 
                 </div>
 
-            </div>
+            </section>
 
 
             <!-- FORM -->
-            <form onsubmit="saveProof(event)">
+            <form id="proofForm">
 
-                <div class="input-group">
+                <div class="form-group">
 
-                    <label>
+                    <label for="itemName">
                         Nama Barang
                     </label>
 
                     <input
-                        type="text"
                         id="itemName"
+                        type="text"
                         placeholder="Contoh: Sepatu"
                         required
                     >
@@ -200,11 +276,11 @@
                 </div>
 
 
-                <div class="input-row">
+                <div class="form-row">
 
-                    <div class="input-group">
+                    <div class="form-group">
 
-                        <label>
+                        <label for="transactionType">
                             Jenis
                         </label>
 
@@ -223,17 +299,17 @@
                     </div>
 
 
-                    <div class="input-group">
+                    <div class="form-group">
 
-                        <label>
+                        <label for="amount">
                             Nominal
                         </label>
 
                         <input
-                            type="number"
                             id="amount"
+                            type="number"
+                            min="1"
                             placeholder="50000"
-                            min="0"
                             required
                         >
 
@@ -242,9 +318,9 @@
                 </div>
 
 
-                <div class="input-group">
+                <div class="form-group">
 
-                    <label>
+                    <label for="category">
                         Kategori
                     </label>
 
@@ -254,16 +330,16 @@
                             📦 Barang
                         </option>
 
-                        <option value="Makanan">
-                            🍔 Makanan
-                        </option>
-
                         <option value="Elektronik">
                             💻 Elektronik
                         </option>
 
                         <option value="Fashion">
                             👕 Fashion
+                        </option>
+
+                        <option value="Makanan">
+                            🍔 Makanan
                         </option>
 
                         <option value="Lainnya">
@@ -275,24 +351,26 @@
                 </div>
 
 
-                <div class="input-group">
+                <div class="form-group">
 
-                    <label>
+                    <label for="note">
                         Catatan
                     </label>
 
                     <textarea
                         id="note"
-                        placeholder="Contoh: Barang sudah diterima customer..."
+                        rows="3"
+                        placeholder="Tambahkan catatan..."
                     ></textarea>
 
                 </div>
 
 
-                <button class="save-btn" type="submit">
-
+                <button
+                    class="save-button"
+                    type="submit"
+                >
                     ✓ Simpan Bukti
-
                 </button>
 
             </form>
@@ -302,21 +380,92 @@
     </div>
 
 
-    <!-- MODAL DETAIL -->
-    <div id="detailModal" class="modal">
+    <!-- KAMERA LIVE -->
+    <div
+        id="cameraModal"
+        class="modal camera-modal"
+    >
 
-        <div class="modal-box detail-box">
+        <div class="camera-content">
+
+            <div class="camera-header">
+
+                <div>
+                    <small>
+                        KAMERA
+                    </small>
+
+                    <h2>
+                        Foto Barang
+                    </h2>
+                </div>
+
+                <button
+                    id="closeCameraButton"
+                    class="close-button camera-close"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="camera-screen">
+
+                <video
+                    id="cameraVideo"
+                    autoplay
+                    playsinline
+                    muted
+                ></video>
+
+            </div>
+
+
+            <button
+                id="captureButton"
+                class="capture-button"
+                type="button"
+            >
+                📸
+            </button>
+
+
+            <canvas
+                id="cameraCanvas"
+                hidden
+            ></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- DETAIL MODAL -->
+    <div
+        id="detailModal"
+        class="modal"
+    >
+
+        <div class="modal-content">
 
             <div class="modal-header">
 
                 <div>
-                    <small>DETAIL</small>
-                    <h2>Bukti Barang</h2>
+                    <small>
+                        DETAIL
+                    </small>
+
+                    <h2>
+                        Bukti Barang
+                    </h2>
                 </div>
 
                 <button
-                    onclick="closeDetail()"
-                    class="close-btn"
+                    id="closeDetailButton"
+                    class="close-button"
+                    type="button"
                 >
                     ×
                 </button>
@@ -326,25 +475,6 @@
 
             <div id="detailContent"></div>
 
-
-            <div class="detail-actions">
-
-                <button
-                    onclick="downloadProof()"
-                    class="download-btn"
-                >
-                    📥 Simpan
-                </button>
-
-                <button
-                    onclick="shareProof()"
-                    class="share-btn"
-                >
-                    📤 Bagikan
-                </button>
-
-            </div>
-
         </div>
 
     </div>
@@ -353,4 +483,4 @@
     <script src="script.js"></script>
 
 </body>
-  </html>
+                        </html>                      
